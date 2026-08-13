@@ -1,4 +1,4 @@
-// src/app/solutions/[slug]/page.tsx
+// src/app/solutions/[slug]/page.tsx - VERSION FINALE CORRIGÉE
 import { GraphQLClient, gql } from 'graphql-request';
 import Link from 'next/link';
 import Header from '@/components/Header';
@@ -7,19 +7,20 @@ import { notFound } from 'next/navigation';
 
 const client = new GraphQLClient(process.env.NEXT_PUBLIC_WORDPRESS_URL || '');
 
+// ✅ REQUÊTE EXACTE BASÉE SUR TON SCHÉMA GRAPHQL ACTUEL
 const GET_SOLUTION_BY_SLUG = gql`
   query GetSolutionBySlug($slug: String!) {
-    solutions(where: { slug: $slug }) {
+    solutions(where: { name: $slug }) {
       nodes {
         title
         slug
         infosProduitSaas {
           accroche
           problemeResolu
+          publicCible
           statut
           fonctionnalites
           tarif
-          delai
         }
       }
     }
@@ -69,10 +70,12 @@ export default async function SolutionDetailPage({ params }: { params: Promise<{
       
       <section className="py-20 px-4">
         <div className="container mx-auto max-w-4xl">
+          {/* Breadcrumb */}
           <Link href="/solutions" className="inline-flex items-center text-sm font-medium text-gray-500 hover:text-brand-primary mb-8 transition-colors">
             ← Retour aux solutions
           </Link>
           
+          {/* Badge Statut */}
           <span className={`inline-block px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wide mb-4
             ${solution.infosProduitSaas?.statut?.includes('disponible') 
               ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' 
@@ -80,12 +83,15 @@ export default async function SolutionDetailPage({ params }: { params: Promise<{
             {solution.infosProduitSaas?.statut?.[0] || 'Info'}
           </span>
           
+          {/* Titre & Accroche */}
           <h1 className="text-4xl md:text-5xl font-bold font-urbanist mb-4">{solution.title}</h1>
           <p className="text-xl text-brand-primary font-kanit mb-8">{solution.infosProduitSaas?.accroche}</p>
           
+          {/* Problème Résolu (WYSIWYG) */}
           <div className="prose prose-lg dark:prose-invert max-w-none mb-12 font-kanit" 
                dangerouslySetInnerHTML={{ __html: solution.infosProduitSaas?.problemeResolu }} />
           
+          {/* Fonctionnalités Clés */}
           {features.length > 0 && (
             <div className="mb-12">
               <h2 className="text-2xl font-bold font-urbanist mb-6">Fonctionnalités clés</h2>
@@ -102,25 +108,32 @@ export default async function SolutionDetailPage({ params }: { params: Promise<{
             </div>
           )}
           
-          {(solution.infosProduitSaas?.tarif || solution.infosProduitSaas?.delai) && (
-            <div className="bg-brand-primary/5 dark:bg-brand-primary/10 rounded-2xl p-8 mb-12 border border-brand-primary/20">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                {solution.infosProduitSaas.tarif && (
-                  <div>
-                    <h3 className="font-bold font-urbanist mb-2">Tarification</h3>
-                    <p className="font-kanit">{solution.infosProduitSaas.tarif}</p>
-                  </div>
-                )}
-                {solution.infosProduitSaas.delai && (
-                  <div>
-                    <h3 className="font-bold font-urbanist mb-2">Délai de mise en œuvre</h3>
-                    <p className="font-kanit">{solution.infosProduitSaas.delai}</p>
-                  </div>
-                )}
-              </div>
-            </div>
-          )}
+         // Remplace UNIQUEMENT la section "Tarification & Public Cible" dans ton fichier
+{(solution.infosProduitSaas?.tarif || solution.infosProduitSaas?.publicCible) && (
+  <div className="bg-brand-primary/5 dark:bg-brand-primary/10 rounded-2xl p-8 mb-12 border border-brand-primary/20">
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+      {solution.infosProduitSaas.tarif && (
+        <div>
+          <h3 className="font-bold font-urbanist mb-2">Tarification</h3>
+          <p className="font-kanit">{solution.infosProduitSaas.tarif}</p>
+        </div>
+      )}
+      
+      {/* ✅ CORRECTION : Utilisation de dangerouslySetInnerHTML pour publicCible */}
+      {solution.infosProduitSaas.publicCible && (
+        <div>
+          <h3 className="font-bold font-urbanist mb-2">Public Cible</h3>
+          <div 
+            className="font-kanit prose prose-sm dark:prose-invert max-w-none [&_p]:mb-2 last:[&_p]:mb-0"
+            dangerouslySetInnerHTML={{ __html: solution.infosProduitSaas.publicCible }} 
+          />
+        </div>
+      )}
+    </div>
+  </div>
+)}
           
+          {/* Call-to-Action */}
           <div className="text-center">
             <Link 
               href={`/contact?solution=${solution.slug}`} 
@@ -132,6 +145,7 @@ export default async function SolutionDetailPage({ params }: { params: Promise<{
         </div>
       </section>
 
+      {/* Footer */}
       <footer className="py-8 border-t border-gray-200 dark:border-gray-800 text-center text-sm text-gray-500 dark:text-gray-400 font-kanit">
         &copy; {new Date().getFullYear()} HoplaTech. Tous droits réservés.
       </footer>

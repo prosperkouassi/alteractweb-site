@@ -55,15 +55,15 @@ export default function Header() {
           </li>
 
           <li className="group relative flex h-full items-center">
-            <button
-              type="button"
+            <Link
+              href="/solutions"
               className="flex h-full items-center gap-1 border-none bg-transparent p-0 font-kanit text-sm font-medium leading-none text-brand-dark transition-colors hover:text-brand-primary dark:text-white"
             >
               <span className="inline-flex items-center">Services Tech</span>
               <svg className="h-3 w-3 transition-transform group-hover:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
               </svg>
-            </button>
+            </Link>
 
             <div className="invisible absolute left-1/2 top-full pt-4 opacity-0 transition-all duration-200 group-hover:visible group-hover:opacity-100 -translate-x-1/2">
               <div className="grid w-[600px] grid-cols-2 gap-6 rounded-2xl border border-gray-200 bg-white p-6 shadow-2xl dark:border-gray-700 dark:bg-[#1a1a1a]">
@@ -152,6 +152,12 @@ export default function Header() {
               </div>
             </div>
           </li>
+          {/* Dans le <ul> principal du Header, après le li "Services Tech" */}
+<li>
+  <Link href="/methode" className="font-kanit text-sm font-medium text-brand-dark dark:text-white hover:text-brand-primary transition-colors">
+    Méthode
+  </Link>
+</li>
 
           <li className="flex h-full items-center">
             <Link href="/a-propos" className="flex h-full items-center font-kanit text-sm font-medium text-brand-dark transition-colors hover:text-brand-primary dark:text-white">
