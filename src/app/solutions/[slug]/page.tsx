@@ -9,7 +9,7 @@ const client = new GraphQLClient(process.env.NEXT_PUBLIC_WORDPRESS_URL || '');
 
 const GET_SOLUTION_BY_SLUG = gql`
   query GetSolutionBySlug($slug: String!) {
-    solutions(where: { name: $slug }) {
+    solutions(where: { slug: $slug }) {
       nodes {
         title
         slug
