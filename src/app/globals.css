@@ -1,0 +1,25 @@
+@import "tailwindcss";
+
+@theme {
+  /* Couleurs personnalisées */
+  --color-brand-primary: #D43D49;
+  --color-brand-secondary: #F74039;
+  --color-brand-dark: #121212;
+  
+  /* Polices */
+  --font-urbanist: "Urbanist", sans-serif;
+  --font-kanit: "Kanit", sans-serif;
+}
+
+/* Styles de base pour le mode sombre/clair */
+body {
+  @apply bg-white text-brand-dark font-kanit transition-colors duration-300;
+}
+
+.dark body {
+  @apply bg-brand-dark text-white;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  @apply font-urbanist font-bold tracking-tight;
+}

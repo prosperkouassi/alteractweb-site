@@ -1,0 +1,140 @@
+// src/app/solutions/[slug]/page.tsx
+import { GraphQLClient, gql } from 'graphql-request';
+import Link from 'next/link';
+import Header from '@/components/Header';
+import type { Metadata } from 'next';
+import { notFound } from 'next/navigation';
+
+const client = new GraphQLClient(process.env.NEXT_PUBLIC_WORDPRESS_URL || '');
+
+const GET_SOLUTION_BY_SLUG = gql`
+  query GetSolutionBySlug($slug: String!) {
+    solutions(where: { name: $slug }) {
+      nodes {
+        title
+        slug
+        infosProduitSaas {
+          accroche
+          problemeResolu
+          statut
+          fonctionnalites
+          tarif
+          delai
+        }
+      }
+    }
+  }
+`;
+
+export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
+  const { slug } = await params;
+  try {
+    const data = await client.request(GET_SOLUTION_BY_SLUG, { slug });
+    const solution = data.solutions.nodes[0];
+    if (!solution) return { title: 'Solution non trouvée | HoplaTech' };
+    
+    return {
+      title: `${solution.title} - HoplaTech`,
+      description: solution.infosProduitSaas?.accroche || `Découvrez ${solution.title}.`
+    };
+  } catch {
+    return { title: 'Solution - HoplaTech' };
+  }
+}
+
+export default async function SolutionDetailPage({ params }: { params: Promise<{ slug: string }> }) {
+  const { slug } = await params;
+  
+  let solution: any = null;
+  try {
+    const data = await client.request(GET_SOLUTION_BY_SLUG, { slug });
+    solution = data.solutions.nodes[0];
+  } catch (e) {
+    console.error('Erreur GraphQL:', e);
+  }
+
+  if (!solution) return notFound();
+
+  // Parser les fonctionnalités HTML (<p>...</p>) retournées par WPGraphQL
+  const rawFeatures = solution.infosProduitSaas?.fonctionnalites || '';
+  const features = rawFeatures
+    .split('</p>')
+    .filter(Boolean)
+    .map((p: string) => p.replace(/<\/?p>/g, '').trim())
+    .filter((f: string) => f.length > 0);
+
+  return (
+    <main className="min-h-screen flex flex-col bg-white dark:bg-brand-dark text-brand-dark dark:text-white">
+      <Header />
+      
+      <section className="py-20 px-4">
+        <div className="container mx-auto max-w-4xl">
+          <Link href="/solutions" className="inline-flex items-center text-sm font-medium text-gray-500 hover:text-brand-primary mb-8 transition-colors">
+            ← Retour aux solutions
+          </Link>
+          
+          <span className={`inline-block px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wide mb-4
+            ${solution.infosProduitSaas?.statut?.includes('disponible') 
+              ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' 
+              : 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400'}`}>
+            {solution.infosProduitSaas?.statut?.[0] || 'Info'}
+          </span>
+          
+          <h1 className="text-4xl md:text-5xl font-bold font-urbanist mb-4">{solution.title}</h1>
+          <p className="text-xl text-brand-primary font-kanit mb-8">{solution.infosProduitSaas?.accroche}</p>
+          
+          <div className="prose prose-lg dark:prose-invert max-w-none mb-12 font-kanit" 
+               dangerouslySetInnerHTML={{ __html: solution.infosProduitSaas?.problemeResolu }} />
+          
+          {features.length > 0 && (
+            <div className="mb-12">
+              <h2 className="text-2xl font-bold font-urbanist mb-6">Fonctionnalités clés</h2>
+              <ul className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {features.map((feat: string, i: number) => (
+                  <li key={i} className="flex items-start gap-3 p-4 bg-gray-50 dark:bg-[#1a1a1a] rounded-lg">
+                    <svg className="w-5 h-5 text-brand-primary mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                    </svg>
+                    <span className="font-kanit">{feat.trim()}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+          
+          {(solution.infosProduitSaas?.tarif || solution.infosProduitSaas?.delai) && (
+            <div className="bg-brand-primary/5 dark:bg-brand-primary/10 rounded-2xl p-8 mb-12 border border-brand-primary/20">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                {solution.infosProduitSaas.tarif && (
+                  <div>
+                    <h3 className="font-bold font-urbanist mb-2">Tarification</h3>
+                    <p className="font-kanit">{solution.infosProduitSaas.tarif}</p>
+                  </div>
+                )}
+                {solution.infosProduitSaas.delai && (
+                  <div>
+                    <h3 className="font-bold font-urbanist mb-2">Délai de mise en œuvre</h3>
+                    <p className="font-kanit">{solution.infosProduitSaas.delai}</p>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+          
+          <div className="text-center">
+            <Link 
+              href={`/contact?solution=${solution.slug}`} 
+              className="inline-block px-8 py-4 bg-brand-dark dark:bg-white text-white dark:text-brand-dark font-bold rounded-lg hover:scale-105 transition-transform shadow-lg"
+            >
+              Demander une démo de {solution.title}
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      <footer className="py-8 border-t border-gray-200 dark:border-gray-800 text-center text-sm text-gray-500 dark:text-gray-400 font-kanit">
+        &copy; {new Date().getFullYear()} HoplaTech. Tous droits réservés.
+      </footer>
+    </main>
+  );
+}
