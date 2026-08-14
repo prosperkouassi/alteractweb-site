@@ -1,13 +1,12 @@
-// src/app/solutions/page.tsx
+// src/app/solutions/page.tsx - VERSION STATIQUE
 import Link from 'next/link';
 import Header from '@/components/Header';
-// Par celle-ci (chemin relatif qui remonte de 2 niveaux) :
-import { solutions } from '../../../data/solutions';
+import { solutions } from '@/data/solutions';
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
   title: "Nos Solutions SaaS - HoplaTech",
-  description: "Gestion locative, gestion scolaire et gestion d'association. Des logiciels métiers pour l'Afrique.",
+  description: "Gestion locative, gestion scolaire et gestion d'association.",
 };
 
 export default function SolutionsPage() {
@@ -24,7 +23,6 @@ export default function SolutionsPage() {
             Des logiciels métiers conçus pour digitaliser votre activité en toute simplicité.
           </p>
 
-          {/* ✅ Boucle sur les données statiques au lieu de GraphQL */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {solutions.map((sol) => (
               <Link 
