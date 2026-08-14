@@ -44,6 +44,7 @@ export async function POST(request: NextRequest) {
     connection = await mysql.createConnection(dbConfig);
 
     // Insertion dans hopla_leads avec les noms de colonnes EXACTS
+    // ✅ CORRECTION TS : Cast explicite pour accéder à insertId
     const [result] = await connection.execute(
       `INSERT INTO hopla_leads 
         (first_name, last_name, email, phone, company_name, sector, solution_slug, message, consent_at, created_at, updated_at) 
@@ -58,7 +59,7 @@ export async function POST(request: NextRequest) {
         solution || null,
         message
       ]
-    );
+    ) as [mysql.ResultSetHeader, any];
 
     return NextResponse.json(
       { success: true, id: result.insertId },
