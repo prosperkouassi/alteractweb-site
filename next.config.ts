@@ -5,9 +5,7 @@ const nextConfig: NextConfig = {
   images: {
     unoptimized: true, // ✅ Hostinger ne supporte pas l'optimisation d'images par défaut
   },
-  experimental: {
-    typedRoutes: false, // ✅ DÉSACTIVE LA GÉNÉRATION DE TYPES QUI BLOQUE LE BUILD
-  },
+  typedRoutes: true, // ✅ ACTIVE LA VÉRIFICATION DES ROUTES TYPÉES (syntaxe Next.js 16)
 };
 
 export default nextConfig;
